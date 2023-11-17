@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:perfect_feed/app/constants/app_icons.dart';
 import 'package:perfect_feed/app/theme/app_colors.dart';
 import 'package:perfect_feed/app/theme/app_text_styles.dart';
+import 'package:perfect_feed/features/presentation/blocs/main/main_cubit.dart';
+import 'package:perfect_feed/features/presentation/pages/onboarding_page.dart';
 import 'package:perfect_feed/features/presentation/widgets/logout_button.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -45,42 +48,52 @@ class _SettingsPageState extends State<SettingsPage> {
           padding: const EdgeInsets.all(16.0),
           child: Column(
             children: [
-              Container(
-                width: double.infinity,
-                height: 120,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.all(Radius.circular(16)),
-                  image: DecorationImage(
-                    alignment: Alignment.center,
-                    image: AssetImage(
-                      'assets/images/features_background.png',
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const OnBoardingPage(
+                      page: 'paywall',
+                    )),
+                  );
+                },
+                child: Container(
+                  width: double.infinity,
+                  height: 120,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.all(Radius.circular(16)),
+                    image: DecorationImage(
+                      alignment: Alignment.center,
+                      image: AssetImage(
+                        'assets/images/features_background.png',
+                      )
+                    ),
+                    gradient: LinearGradient(
+                      colors: [
+                        Color(0xff1488CC),
+                        Color(0xff2B32B2),
+                      ],
                     )
                   ),
-                  gradient: LinearGradient(
-                    colors: [
-                      Color(0xff1488CC),
-                      Color(0xff2B32B2),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      AppSvgAssetIcon(
+                        asset: AppIcons.features,
+                      ),
+                      const SizedBox(
+                        height: 8,
+                      ),
+                      Text(
+                        'Unlock all features',
+                        style: AppTextStyles.title.copyWith(
+                          color: AppColors.white,
+                        ),
+                      ),
                     ],
                   )
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    AppSvgAssetIcon(
-                      asset: AppIcons.features,
-                    ),
-                    const SizedBox(
-                      height: 8,
-                    ),
-                    Text(
-                      'Unlock all features',
-                      style: AppTextStyles.title.copyWith(
-                        color: AppColors.white,
-                      ),
-                    ),
-                  ],
-                )
               ),
               const SizedBox(
                 height: 24,
@@ -215,7 +228,20 @@ class _SettingsPageState extends State<SettingsPage> {
               const SizedBox(
                 height: 24,
               ),
-              LogoutButton(),
+              GestureDetector(
+                onTap: () {
+                  context.read<MainCubit>().logout();
+                  Navigator.pop(context);
+                  Navigator.pop(context);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const OnBoardingPage(
+                      page: 'instagram',
+                    )),
+                  );
+                },
+                child: LogoutButton(),
+              ),
             ],
           ),
         ),

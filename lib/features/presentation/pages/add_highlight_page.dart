@@ -5,6 +5,7 @@ import 'package:hive/hive.dart';
 import 'package:perfect_feed/app/constants/app_icons.dart';
 import 'package:perfect_feed/app/theme/app_colors.dart';
 import 'package:perfect_feed/app/theme/app_text_styles.dart';
+import 'package:perfect_feed/app/utils/utils.dart';
 import 'package:perfect_feed/features/presentation/blocs/main/main_cubit.dart';
 import 'package:perfect_feed/features/presentation/widgets/add_note_bottom_sheet.dart';
 import 'package:perfect_feed/features/presentation/widgets/add_note_button.dart';
@@ -44,93 +45,106 @@ class _AddHighlightPageState extends State<AddHighlightPage> {
     );
   }
 
+  Future<bool> _onWillPop() async {
+    return true;
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        elevation: 0,
-        backgroundColor: AppColors.white,
-        title: Row(
+    return WillPopScope(
+      onWillPop: _onWillPop,
+      child: Scaffold(
+        appBar: AppBar(
+          automaticallyImplyLeading: false,
+          elevation: 0,
+          backgroundColor: AppColors.white,
+          title: Row(
+            children: [
+              AppSvgAssetIcon(
+                asset: AppIcons.arrowBack,
+                color: AppColors.accent,
+                onTap: () {
+                  showAlertDialog(
+                    context,
+                    'Highlight unsaved',
+                    'Highlight will not be saved, do you really want to continue?',
+                    'OK', (){
+                      Navigator.pop(context);
+                    },
+                  );
+                },
+              ),
+              const Spacer(),
+              Text(
+                'Highlight addition',
+                style: AppTextStyles.title.copyWith(
+                  color: AppColors.black,
+                ),
+              ),
+              const Spacer(),
+              AppSvgAssetIcon(
+                asset: AppIcons.checkmark,
+                color: AppColors.accent,
+                onTap: () {
+                  context.read<MainCubit>().addHighlight(widget.image, note);
+                  Navigator.pop(context);
+                },
+              ),
+            ],
+          ),
+          // titleSpacing: 0,
+        ),
+        body: Stack(
+          alignment: Alignment.center,
           children: [
-            AppSvgAssetIcon(
-              asset: AppIcons.arrowBack,
-              color: AppColors.accent,
-              onTap: () {
-                /// post unsaved notification
-                Navigator.pop(context);
-              },
-            ),
-            const Spacer(),
-            Text(
-              'Highlight addition',
-              style: AppTextStyles.title.copyWith(
-                color: AppColors.black,
+            SingleChildScrollView(
+              child: Column(
+                children: [
+                  const SizedBox(
+                    height: 16,
+                  ),
+                  Column(
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(MediaQuery.of(context).size.width,),
+                        child: Image.memory(
+                          Uint8List.fromList(widget.image),
+                          gaplessPlayback: true,
+                          height: MediaQuery.of(context).size.width,
+                          width: MediaQuery.of(context).size.width,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    ],
+                  ),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Padding(
+                      padding: EdgeInsets.all(24),
+                      child: Text(
+                        note,
+                        textAlign: TextAlign.left,
+                        style: AppTextStyles.footnote,
+                      ),
+                    ),
+                  ),
+                  SizedBox(
+                    height: MediaQuery.of(context).size.height / 2,
+                  ),
+                ],
               ),
             ),
-            const Spacer(),
-            AppSvgAssetIcon(
-              asset: AppIcons.checkmark,
-              color: AppColors.accent,
-              onTap: () {
-                context.read<MainCubit>().addHighlight(widget.image, note);
-                Navigator.pop(context);
-              },
+            Positioned(
+              bottom: 40,
+              child: GestureDetector(
+                onTap: showAddNoteBottomSheet,
+                child: AddNoteButton(
+                  isEdit: note.isNotEmpty,
+                ),
+              ),
             ),
           ],
         ),
-        // titleSpacing: 0,
-      ),
-      body: Stack(
-        alignment: Alignment.center,
-        children: [
-          SingleChildScrollView(
-            child: Column(
-              children: [
-                const SizedBox(
-                  height: 16,
-                ),
-                Column(
-                  children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(375.0),
-                      child: Image.memory(
-                        Uint8List.fromList(widget.image),
-                        gaplessPlayback: true,
-                        height: 375,
-                        width: 375,
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                  ],
-                ),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Padding(
-                    padding: EdgeInsets.all(24),
-                    child: Text(
-                      note,
-                      textAlign: TextAlign.left,
-                      style: AppTextStyles.footnote,
-                    ),
-                  ),
-                ),
-                SizedBox(
-                  height: MediaQuery.of(context).size.height / 2,
-                ),
-              ],
-            ),
-          ),
-          Positioned(
-            bottom: 40,
-            child: GestureDetector(
-              onTap: showAddNoteBottomSheet,
-              child: AddNoteButton(
-                isEdit: note.isNotEmpty,
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }

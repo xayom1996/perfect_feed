@@ -31,8 +31,11 @@ class Post {
   }
 
   factory Post.fromMap(Map<String, dynamic> map) {
+    final List<dynamic> imageList = map['image'] ?? [];
+    final List<int> image = imageList.map((e) => e as int).toList();
+
     return Post(
-      image: map['image'],
+      image: image,
       imageUrl: map['imageUrl'],
       mediaType: map['mediaType'],
       note: map['note'],

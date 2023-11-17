@@ -1,9 +1,11 @@
+import 'package:app_settings/app_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:perfect_feed/app/constants/app_icons.dart';
 import 'package:perfect_feed/app/theme/app_colors.dart';
 import 'package:perfect_feed/app/theme/app_text_styles.dart';
+import 'package:perfect_feed/app/utils/utils.dart';
 import 'package:perfect_feed/features/presentation/blocs/main/main_cubit.dart';
 import 'package:perfect_feed/features/presentation/pages/add_post_page.dart';
 import 'package:perfect_feed/features/presentation/widgets/add_note_bottom_sheet.dart';
@@ -28,20 +30,34 @@ class _AddPostBottomSheetState extends State<AddPostBottomSheet> {
       Navigator.pop(context);
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => AppPostPage(image: _image!)),
+        MaterialPageRoute(builder: (context) => AppPostPage(image: _image!, file: image,)),
       );
     }
   }
 
   Future getCameraImage() async {
     ImagePicker picker = ImagePicker();
-    var image = await picker.pickImage(source: ImageSource.camera);
-    if (image != null) {
-      _image = await image.readAsBytes();
-      Navigator.pop(context);
-      Navigator.push(
+    try {
+      var image = await picker.pickImage(source: ImageSource.camera);
+      if (image != null) {
+        _image = await image.readAsBytes();
+        Navigator.pop(context);
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => AppPostPage(image: _image!, file: image,)),
+        );
+      }
+    } catch(_) {
+      showAlertDialog(
         context,
-        MaterialPageRoute(builder: (context) => AppPostPage(image: _image!)),
+        'No access to the camera',
+        'To give access to the camera, you need to open the settings',
+        'Settings',
+            (){
+          Navigator.pop(context);
+          AppSettings.openAppSettings(type: AppSettingsType.location);
+        },
       );
     }
   }

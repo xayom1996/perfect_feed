@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:perfect_feed/app/theme/app_colors.dart';
 import 'package:perfect_feed/app/theme/app_text_styles.dart';
 import 'package:perfect_feed/features/presentation/blocs/paywall/paywall_cubit.dart';
@@ -8,7 +9,8 @@ import 'package:perfect_feed/features/presentation/pages/main_page.dart';
 import 'package:perfect_feed/features/presentation/widgets/custom_button.dart';
 
 class OnBoardingPage extends StatefulWidget {
-  const OnBoardingPage({Key? key}) : super(key: key);
+  final String? page;
+  const OnBoardingPage({Key? key, this.page}) : super(key: key);
 
   @override
   State<OnBoardingPage> createState() => _OnBoardingPageState();
@@ -17,6 +19,13 @@ class OnBoardingPage extends StatefulWidget {
 class _OnBoardingPageState extends State<OnBoardingPage> {
   int currentIndex = 0;
   final PageController pageController = PageController();
+
+  @override
+  void didChangeDependencies() async {
+    var box = await Hive.openBox('perfect_feed_box');
+    box.put('onboarding_showed', true);
+    super.didChangeDependencies();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -39,54 +48,62 @@ class _OnBoardingPageState extends State<OnBoardingPage> {
                   });
                 },
                 children: [
-                  OnBoardingItemPage(
-                    title: 'create the perfect feed',
-                    index: 1,
-                    buttonTitle: 'Next',
-                    onTap: () {
-                      pageController.nextPage(
-                        duration: Duration(milliseconds: 300),
-                        curve: Curves.ease,
-                      );
-                    },
-                  ),
-                  OnBoardingItemPage(
-                    title: 'write a note for a new publication',
-                    index: 2,
-                    buttonTitle: 'Next',
-                    onTap: () {
-                      pageController.nextPage(
-                        duration: Duration(milliseconds: 300),
-                        curve: Curves.ease,
-                      );
-                    },
-                  ),
-                  BlocBuilder<PaywallCubit, PaywallState>(
-                    builder: (context, state) {
-                      return OnBoardingItemPage(
-                        title: 'unlock all app features',
-                        index: 3,
-                        buttonTitle: 'Unlock',
-                        onTap: () {
-                          pageController.nextPage(
-                            duration: Duration(milliseconds: 300),
-                            curve: Curves.ease,
-                          );
-                        },
-                      );
-                    }
-                  ),
-                  OnBoardingItemPage(
-                    title: 'Login to get started',
-                    index: 4,
-                    buttonTitle: 'Login with Instagram',
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => InstagramAPIWebView()),
-                      );
-                    },
-                  ),
+                  if (widget.page == null)
+                    OnBoardingItemPage(
+                      title: 'create the perfect feed',
+                      index: 1,
+                      buttonTitle: 'Next',
+                      onTap: () {
+                        pageController.nextPage(
+                          duration: Duration(milliseconds: 300),
+                          curve: Curves.ease,
+                        );
+                      },
+                    ),
+                  if (widget.page == null)
+                    OnBoardingItemPage(
+                      title: 'write a note for a new publication',
+                      index: 2,
+                      buttonTitle: 'Next',
+                      onTap: () {
+                        pageController.nextPage(
+                          duration: Duration(milliseconds: 300),
+                          curve: Curves.ease,
+                        );
+                      },
+                    ),
+                  if (widget.page == null || widget.page == 'paywall')
+                    BlocBuilder<PaywallCubit, PaywallState>(
+                      builder: (context, state) {
+                        return OnBoardingItemPage(
+                          title: 'unlock all app features',
+                          index: 3,
+                          buttonTitle: 'Unlock',
+                          onTap: () {
+                            if (widget.page == 'paywall') {
+                              Navigator.pop(context);
+                            } else {
+                              pageController.nextPage(
+                                duration: Duration(milliseconds: 300),
+                                curve: Curves.ease,
+                              );
+                            }
+                          },
+                        );
+                      }
+                    ),
+                  if (widget.page == null || widget.page == 'instagram')
+                    OnBoardingItemPage(
+                      title: 'Login to get started',
+                      index: 4,
+                      buttonTitle: 'Login with Instagram',
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const InstagramAPIWebView()),
+                        );
+                      },
+                    ),
                 ],
               ),
             ),
@@ -208,9 +225,7 @@ class OnBoardingItemPage extends StatelessWidget {
                 size: 26,
                 color: AppColors.blackSecondary,
               ),
-              onPressed: () {
-
-              },
+              onPressed: onTap,
             ),
           ),
         if (index == 4)

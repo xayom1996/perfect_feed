@@ -2,19 +2,24 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hive/hive.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:in_app_review/in_app_review.dart';
 import 'package:perfect_feed/app/constants/app_icons.dart';
 import 'package:perfect_feed/app/theme/app_colors.dart';
 import 'package:perfect_feed/app/theme/app_text_styles.dart';
+import 'package:perfect_feed/app/utils/utils.dart';
 import 'package:perfect_feed/features/data/models/highlight.dart';
 import 'package:perfect_feed/features/data/models/post.dart';
 import 'package:perfect_feed/features/presentation/blocs/main/main_cubit.dart';
 import 'package:perfect_feed/features/presentation/pages/add_highlight_page.dart';
+import 'package:perfect_feed/features/presentation/pages/onboarding_page.dart';
 import 'package:perfect_feed/features/presentation/pages/settings_page.dart';
 import 'package:perfect_feed/features/presentation/widgets/add_note_bottom_sheet.dart';
 import 'package:perfect_feed/features/presentation/widgets/add_post_bottom_sheet.dart';
 import 'package:perfect_feed/features/presentation/widgets/add_post_button.dart';
 import 'package:perfect_feed/features/presentation/widgets/highlight_container.dart';
 import 'package:perfect_feed/features/presentation/widgets/post_container.dart';
+
+enum Availability { loading, available, unavailable }
 
 class MainPage extends StatefulWidget {
   const MainPage({Key? key}) : super(key: key);
@@ -25,17 +30,64 @@ class MainPage extends StatefulWidget {
 
 class _MainPageState extends State<MainPage> {
   String note = '';
+  final InAppReview _inAppReview = InAppReview.instance;
+  final String _appStoreId = '';
 
-  void showAddPostBottomSheet() {
-    showModalBottomSheet<void>(
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      barrierColor: Colors.black.withOpacity(0.4),
-      context: context,
-      builder: (BuildContext context) {
-        return const AddPostBottomSheet();
-      },
-    );
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  void didChangeDependencies() async {
+    (<T>(T? o) => o!)(WidgetsBinding.instance).addPostFrameCallback((_) async {
+      try {
+        final isAvailable = await _inAppReview.isAvailable();
+        var box = await Hive.openBox('perfect_feed_box');
+        if (isAvailable && box.get('review_showed') != true) {
+          box.put('review_showed', true);
+          _requestReview();
+        }
+      } catch (_) {
+      }
+    });
+    super.didChangeDependencies();
+  }
+
+  Future<void> _requestReview() => _inAppReview.requestReview();
+
+  Future<void> _openStoreListing() => _inAppReview.openStoreListing(
+    appStoreId: _appStoreId,
+  );
+
+  void showAddPostBottomSheet(MainState mainState) {
+    if (mainState.paywallStatus == PaywallStatus.subscribe || mainState.remainingQuantityPost > 0) {
+      showModalBottomSheet<void>(
+        isScrollControlled: true,
+        backgroundColor: Colors.transparent,
+        barrierColor: Colors.black.withOpacity(0.4),
+        context: context,
+        builder: (BuildContext context) {
+          return const AddPostBottomSheet();
+        },
+      );
+    } else {
+      showAlertDialog(
+        context,
+        'You\'ve reached your limit',
+        'Subscribe to create an unlimited number of posts',
+        'Subscribe',
+        (){
+          Navigator.pop(context);
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const OnBoardingPage(
+              page: 'paywall',
+            )),
+          );
+        },
+      );
+    }
   }
 
   Future getImage() async {
@@ -78,12 +130,18 @@ class _MainPageState extends State<MainPage> {
                 );
               }
             ),
-            Positioned(
-              bottom: 40,
-              child: GestureDetector(
-                onTap: showAddPostBottomSheet,
-                child: AddPostButton(),
-              ),
+            BlocBuilder<MainCubit, MainState>(
+              builder: (context, state) {
+                return Positioned(
+                  bottom: 40,
+                  child: GestureDetector(
+                    onTap: () {
+                      showAddPostBottomSheet(state);
+                    },
+                    child: AddPostButton(),
+                  ),
+                );
+              }
             ),
           ],
         ),
@@ -149,7 +207,7 @@ class _MainPageState extends State<MainPage> {
                                 height: 4,
                               ),
                               Text(
-                                state.countPost.toString(),
+                                state.posts.length.toString(),
                                 style: AppTextStyles.body,
                               ),
                             ],

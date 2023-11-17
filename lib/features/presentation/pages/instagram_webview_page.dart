@@ -166,7 +166,9 @@ class _InstagramAPIWebViewState extends State<InstagramAPIWebView> {
                   asset: AppIcons.arrowBack,
                   color: AppColors.accent,
                   onTap: () {
-                    Navigator.pop(context);
+                    if (isSuccess == false) {
+                      Navigator.pop(context);
+                    }
                   },
                 ),
                 const Spacer(),
