@@ -7,6 +7,7 @@ import 'package:perfect_feed/features/presentation/blocs/paywall/paywall_cubit.d
 import 'package:perfect_feed/features/presentation/pages/instagram_webview_page.dart';
 import 'package:perfect_feed/features/presentation/pages/main_page.dart';
 import 'package:perfect_feed/features/presentation/widgets/custom_button.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class OnBoardingPage extends StatefulWidget {
   final String? page;
@@ -128,6 +129,12 @@ class OnBoardingItemPage extends StatelessWidget {
       required this.buttonTitle})
       : super(key: key);
 
+  Future<void> _launchUrl(String url) async {
+    if (!await launchUrl(Uri.parse(url))) {
+      throw Exception('Could not launch $url');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Stack(
@@ -181,6 +188,9 @@ class OnBoardingItemPage extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     GestureDetector(
+                      onTap: () async {
+                        await _launchUrl('https://doc-hosting.flycricket.io/threads-layout-for-instagram-privacy-policy/6f756549-8dd1-42d0-9fa8-061fac0fba01/privacy');
+                      },
                       child: Text(
                         'Privacy Policy',
                         style: AppTextStyles.caption.copyWith(
@@ -197,6 +207,9 @@ class OnBoardingItemPage extends StatelessWidget {
                       ),
                     ),
                     GestureDetector(
+                      onTap: () async {
+                        await _launchUrl('https://doc-hosting.flycricket.io/threads-layout-for-instagram-terms-of-use/ff01730b-3a65-4544-a681-5175e452ad50/terms');
+                      },
                       child: Text(
                         'Terms of Use',
                         style: AppTextStyles.caption.copyWith(

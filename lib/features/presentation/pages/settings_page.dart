@@ -6,6 +6,7 @@ import 'package:perfect_feed/app/theme/app_text_styles.dart';
 import 'package:perfect_feed/features/presentation/blocs/main/main_cubit.dart';
 import 'package:perfect_feed/features/presentation/pages/onboarding_page.dart';
 import 'package:perfect_feed/features/presentation/widgets/logout_button.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({Key? key}) : super(key: key);
@@ -15,6 +16,13 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
+
+  Future<void> _launchUrl(String url) async {
+    if (!await launchUrl(Uri.parse(url))) {
+      throw Exception('Could not launch $url');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -110,8 +118,8 @@ class _SettingsPageState extends State<SettingsPage> {
                 shrinkWrap: true,
                 children: [
                   GestureDetector(
-                    onTap: () {
-
+                    onTap: () async {
+                      await _launchUrl('https://doc-hosting.flycricket.io/threads-layout-for-instagram-terms-of-use/ff01730b-3a65-4544-a681-5175e452ad50/terms');
                     },
                     child: Container(
                       decoration: BoxDecoration(
@@ -139,8 +147,8 @@ class _SettingsPageState extends State<SettingsPage> {
                   ),
                   // const SizedBox(width: 8),
                   GestureDetector(
-                    onTap: () {
-
+                    onTap: () async {
+                      await _launchUrl('https://doc-hosting.flycricket.io/threads-layout-for-instagram-privacy-policy/6f756549-8dd1-42d0-9fa8-061fac0fba01/privacy');
                     },
                     child: Container(
                       decoration: BoxDecoration(
@@ -196,8 +204,8 @@ class _SettingsPageState extends State<SettingsPage> {
                   ),
                   // const SizedBox(width: 8),
                   GestureDetector(
-                    onTap: () {
-
+                    onTap: () async {
+                      await _launchUrl('https://8mcv1l31sbn.typeform.com/to/VzimJQ3l');
                     },
                     child: Container(
                       decoration: BoxDecoration(
