@@ -6,14 +6,10 @@ enum MainStatus {
   notAuth,
 }
 
-enum PaywallStatus {
-  notSubscribe,
-  subscribe,
-}
+
 
 class MainState extends Equatable {
   final MainStatus mainStatus;
-  final PaywallStatus paywallStatus;
   final String tabStatus;
   final List<Post> posts;
   final List<Highlight> highlights;
@@ -23,7 +19,6 @@ class MainState extends Equatable {
 
   const MainState({
     this.mainStatus = MainStatus.init,
-    this.paywallStatus = PaywallStatus.notSubscribe,
     this.tabStatus = 'feed',
     this.posts = const [],
     this.highlights = const [],
@@ -33,7 +28,7 @@ class MainState extends Equatable {
   });
 
   @override
-  List<Object?> get props => [mainStatus, userName, countPost, tabStatus, posts, highlights, paywallStatus, remainingQuantityPost];
+  List<Object?> get props => [mainStatus, userName, countPost, tabStatus, posts, highlights, remainingQuantityPost];
 
   List<Post> getPosts() {
     return posts.where((element) {
@@ -51,7 +46,6 @@ class MainState extends Equatable {
 
   MainState copyWith({
     MainStatus? mainStatus,
-    PaywallStatus? paywallStatus,
     String? tabStatus,
     List<Post>? posts,
     List<Highlight>? highlights,
@@ -61,7 +55,6 @@ class MainState extends Equatable {
   }) {
     return MainState(
       mainStatus: mainStatus ?? this.mainStatus,
-      paywallStatus: paywallStatus ?? this.paywallStatus,
       tabStatus: tabStatus ?? this.tabStatus,
       posts: posts ?? this.posts,
       highlights: highlights ?? this.highlights,

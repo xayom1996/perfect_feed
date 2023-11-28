@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:perfect_feed/app/theme/app_colors.dart';
 import 'package:perfect_feed/app/theme/app_text_styles.dart';
+import 'package:perfect_feed/app/utils/utils.dart';
 import 'package:perfect_feed/features/presentation/blocs/paywall/paywall_cubit.dart';
 import 'package:perfect_feed/features/presentation/pages/instagram_webview_page.dart';
 import 'package:perfect_feed/features/presentation/pages/main_page.dart';
@@ -74,24 +75,38 @@ class _OnBoardingPageState extends State<OnBoardingPage> {
                       },
                     ),
                   if (widget.page == null || widget.page == 'paywall')
-                    BlocBuilder<PaywallCubit, PaywallState>(
-                      builder: (context, state) {
-                        return OnBoardingItemPage(
-                          title: 'unlock all app features',
-                          index: 3,
-                          buttonTitle: 'Unlock',
-                          onTap: () {
-                            if (widget.page == 'paywall') {
-                              Navigator.pop(context);
-                            } else {
-                              pageController.nextPage(
-                                duration: Duration(milliseconds: 300),
-                                curve: Curves.ease,
-                              );
-                            }
-                          },
-                        );
-                      }
+                    BlocListener<PaywallCubit, PaywallState>(
+                      listener: (context, state) {
+                        if (state.paywallStatus == PaywallStatus.error) {
+                          showTextDialog(context, state.errorMessage);
+                        }
+                        if (state.paywallStatus == PaywallStatus.subscribe) {
+                          if (widget.page == 'paywall') {
+                            Navigator.pop(context);
+                          } else {
+                            Navigator.pop(context);
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => const OnBoardingPage(
+                                page: 'instagram',
+                              )),
+                            );
+                          }
+                        }
+                      },
+                      child: BlocBuilder<PaywallCubit, PaywallState>(
+                        builder: (context, state) {
+                          return OnBoardingItemPage(
+                            title: 'unlock all app features',
+                            index: 3,
+                            page: widget.page,
+                            buttonTitle: 'Unlock',
+                            onTap: () {
+                              context.read<PaywallCubit>().subscribe();
+                            },
+                          );
+                        }
+                      ),
                     ),
                   if (widget.page == null || widget.page == 'instagram')
                     OnBoardingItemPage(
@@ -120,12 +135,14 @@ class OnBoardingItemPage extends StatelessWidget {
   final String title;
   final String buttonTitle;
   final Function() onTap;
+  final String? page;
 
   const OnBoardingItemPage(
       {Key? key,
       required this.onTap,
       required this.index,
       required this.title,
+      this.page,
       required this.buttonTitle})
       : super(key: key);
 
@@ -238,7 +255,17 @@ class OnBoardingItemPage extends StatelessWidget {
                 size: 26,
                 color: AppColors.blackSecondary,
               ),
-              onPressed: onTap,
+              onPressed: () {
+                Navigator.pop(context);
+                if (page != 'paywall') {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const OnBoardingPage(
+                      page: 'instagram',
+                    )),
+                  );
+                }
+              },
             ),
           ),
         if (index == 4)

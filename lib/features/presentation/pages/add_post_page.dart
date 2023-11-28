@@ -116,6 +116,7 @@ class _AppPostPageState extends State<AppPostPage> {
                     'OK',
                     (){
                       Navigator.pop(context);
+                      Navigator.pop(context);
                     },
                   );
                 },

@@ -1,6 +1,26 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
+void showTextDialog(BuildContext context, String message) {
+  showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return CupertinoAlertDialog(
+          content: Text(message),
+          actions: <Widget>[
+            CupertinoDialogAction(
+              child: Text(
+                "OK",
+              ),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      });
+}
+
 void showAlertDialog(
     BuildContext context,
     String title,

@@ -10,6 +10,7 @@ import 'package:perfect_feed/app/utils/utils.dart';
 import 'package:perfect_feed/features/data/models/highlight.dart';
 import 'package:perfect_feed/features/data/models/post.dart';
 import 'package:perfect_feed/features/presentation/blocs/main/main_cubit.dart';
+import 'package:perfect_feed/features/presentation/blocs/paywall/paywall_cubit.dart';
 import 'package:perfect_feed/features/presentation/pages/add_highlight_page.dart';
 import 'package:perfect_feed/features/presentation/pages/onboarding_page.dart';
 import 'package:perfect_feed/features/presentation/pages/settings_page.dart';
@@ -60,8 +61,8 @@ class _MainPageState extends State<MainPage> {
     appStoreId: _appStoreId,
   );
 
-  void showAddPostBottomSheet(MainState mainState) {
-    if (mainState.paywallStatus == PaywallStatus.subscribe || mainState.remainingQuantityPost > 0) {
+  void showAddPostBottomSheet(MainState mainState, PaywallState paywallState) {
+    if (paywallState.paywallStatus == PaywallStatus.subscribe || mainState.remainingQuantityPost > 0) {
       showModalBottomSheet<void>(
         isScrollControlled: true,
         backgroundColor: Colors.transparent,
@@ -104,48 +105,57 @@ class _MainPageState extends State<MainPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        bottom: false,
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            BlocBuilder<MainCubit, MainState>(
-              builder: (context, state) {
-                return SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _userInfo(state),
-                      _highlights(state.highlights),
-                      const SizedBox(
-                        height: 16,
+    return BlocListener<PaywallCubit, PaywallState>(
+      listener: (context, state) {
+        // TODO: implement listener
+      },
+      child: Scaffold(
+          body: SafeArea(
+            bottom: false,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                BlocBuilder<MainCubit, MainState>(
+                  builder: (context, state) {
+                    return SingleChildScrollView(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _userInfo(state),
+                          _highlights(state.highlights),
+                          const SizedBox(
+                            height: 16,
+                          ),
+                          _feed(state.getPosts(), state.tabStatus),
+                          SizedBox(
+                            height: MediaQuery.of(context).size.height / 2,
+                          ),
+                        ]
                       ),
-                      _feed(state.getPosts(), state.tabStatus),
-                      SizedBox(
-                        height: MediaQuery.of(context).size.height / 2,
-                      ),
-                    ]
-                  ),
-                );
-              }
+                    );
+                  }
+                ),
+                BlocBuilder<PaywallCubit, PaywallState>(
+                  builder: (context, paywallState) {
+                    return BlocBuilder<MainCubit, MainState>(
+                      builder: (context, mainState) {
+                        return Positioned(
+                          bottom: 40,
+                          child: GestureDetector(
+                            onTap: () {
+                              showAddPostBottomSheet(mainState, paywallState);
+                            },
+                            child: AddPostButton(),
+                          ),
+                        );
+                      }
+                    );
+                  }
+                ),
+              ],
             ),
-            BlocBuilder<MainCubit, MainState>(
-              builder: (context, state) {
-                return Positioned(
-                  bottom: 40,
-                  child: GestureDetector(
-                    onTap: () {
-                      showAddPostBottomSheet(state);
-                    },
-                    child: AddPostButton(),
-                  ),
-                );
-              }
-            ),
-          ],
+          ),
         ),
-      ),
     );
   }
 

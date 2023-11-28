@@ -1,3 +1,4 @@
+import 'package:apphud/apphud.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -12,6 +13,7 @@ import 'package:perfect_feed/features/presentation/pages/splash_page.dart';
 Future<void> main() async {
   await diInit();
   await Hive.initFlutter();
+  await Apphud.start(apiKey: 'app_mKbDWvNUiC3m1Ap8gaAeANxqgosRup');
 
   runApp(const MyApp());
 }

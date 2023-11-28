@@ -1,10 +1,32 @@
 part of 'paywall_cubit.dart';
 
-abstract class PaywallState extends Equatable {
-  const PaywallState();
+enum PaywallStatus {
+  init,
+  loading,
+  error,
+  notSubscribe,
+  subscribe,
 }
 
-class PaywallInitial extends PaywallState {
+class PaywallState extends Equatable {
+  final PaywallStatus paywallStatus;
+  final String errorMessage;
+
+  const PaywallState({
+    this.paywallStatus = PaywallStatus.init,
+    this.errorMessage = '',
+  });
+
   @override
-  List<Object> get props => [];
+  List<Object?> get props => [paywallStatus, errorMessage];
+
+  PaywallState copyWith({
+    PaywallStatus? paywallStatus,
+    String? errorMessage,
+  }) {
+    return PaywallState(
+      paywallStatus: paywallStatus ?? this.paywallStatus,
+      errorMessage: errorMessage ?? this.errorMessage,
+    );
+  }
 }

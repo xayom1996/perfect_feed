@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:apphud/apphud.dart';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:hive_flutter/hive_flutter.dart';
